@@ -10,7 +10,7 @@ def get_character_movies_from_api(character)
   #   `character`
   collection_films = []  
     character_hash['results'].each do |character_hash|
-      if character_hash['name'] == character
+      if character_hash['name'].downcase == character.downcase
         collection_films = character_hash['films']
       end
     end
@@ -33,6 +33,13 @@ end
 
 def parse_character_movies(films_hash)
   # some iteration magic and puts out the movies in a nice list
+  films_hash.each do |key|
+    key.each do |title, film|
+      if title == "title"
+        puts film
+      end
+    end
+  end
 end
 
 def show_character_movies(character)
@@ -44,4 +51,3 @@ end
 
 # that `get_character_movies_from_api` method is probably pretty long. Does it do more than one job?
 # can you split it up into helper methods?
-get_character_movies_from_api("Luke Skywalker")
