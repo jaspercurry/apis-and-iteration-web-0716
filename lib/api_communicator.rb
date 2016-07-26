@@ -5,15 +5,26 @@ require 'pry'
 
 def get_character_movies_from_api(character)
   #make the web request
-  all_characters = RestClient.get('http://www.swapi.co/api/people/')
-  character_hash = JSON.parse(all_characters)
+  all_characters = []
+  next_page = []
+  character_hash = []
+  initial_page = RestClient.get('http://www.swapi.co/api/people/')
+  init_character_hash = JSON.parse(initial_page)
+  until init_character_hash["next"] == nil
+    next_page = init_character_hash["next"]
+    all_characters = RestClient.get(next_page)
+    character_hash << JSON.parse(all_characters)
+    init_character_hash = next_page
+    binding.pry
+  end
+
   collection_films = []
-    character_hash["results"].each do |array|
-      if array['name'] == character
-      collection_films = array['films']
+    character_hash["results"].each do |hash|
+      if hash['name'] == character
+      collection_films = hash['films']
     end
   end
-film_data = {}
+  film_data = {}
   collection_films.each do |film|
     film_data = RestClient.get(film)
     
@@ -29,7 +40,7 @@ film_data = {}
         collection_films = character_hash['films']
       end
     end
-    
+
   # collect those film API urls, make a web request to each URL to get the info
   #  for that film
     # return value of this method should be collection of info about each film. 
@@ -67,3 +78,4 @@ end
 
 # that `get_character_movies_from_api` method is probably pretty long. Does it do more than one job?
 # can you split it up into helper methods?
+get_character_movies_from_api("Luke Skywalker")
