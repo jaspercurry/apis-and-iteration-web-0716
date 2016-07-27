@@ -3,47 +3,34 @@ require 'json'
 require 'pry'
 
 
+def consolodate_pages
+end
+
+
+
 def get_character_movies_from_api(character)
-  #make the web request
   all_characters = RestClient.get('http://www.swapi.co/api/people/')
   character_hash = JSON.parse(all_characters)
-  collection_films = []
-    character_hash["results"].each do |array|
-      if array['name'] == character
-      collection_films = array['films']
-    end
-  end
-film_data = {}
-  collection_films.each do |film|
-    film_data = RestClient.get(film)
-    
-  end
-
-
-
-  # iterate ove the character hash to find the collection of `films` for the given
-  #   `character`
-  collection_films = []  
-    character_hash['results'].each do |character_hash|
-      if character_hash['name'].downcase == character.downcase
-        collection_films = character_hash['films']
+  while character_hash["next"] != nil 
+    all_characters = RestClient.get(character_hash["next"])
+    var = JSON.parse(all_characters)
+      var["results"].each do |thing|
+      character_hash["results"] << thing
       end
-    end
-  # collect those film API urls, make a web request to each URL to get the info
-  #  for that film
-  #======>Jasper-machine
-  film_data = []
-  film_restclient = []
-  collection_films.each do |film|
-    film_restclient = RestClient.get(film)
-    film_data << JSON.parse(film_restclient)
+    character_hash["next"] = var["next"]
   end
-  # return value of this method should be collection of info about each film. 
-  #  i.e. an array of hashes in which each hash reps a given film
-  # this collection will be the argument given to `parse_character_movies`
-  #  and that method will do some nice presentation stuff: puts out a list 
-  #  of movies by title. play around with puts out other info about a given film.
-
+  collection_films = []
+    character_hash["results"].each do |hash|
+      if hash["name"].downcase == character.downcase
+      collection_films = hash["films"]
+    end
+  end
+      film_data = []
+      film_restclient = []
+      collection_films.each do |film|
+        film_restclient = RestClient.get(film)
+        film_data << JSON.parse(film_restclient)
+      end
 film_data
 end
 
